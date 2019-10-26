@@ -5,4 +5,5 @@ interface ServerResponse {
 	answer: RTCSessionDescriptionInit;
 	candidate: RTCIceCandidateInit;
 	name: string;
+	data: any;
 }

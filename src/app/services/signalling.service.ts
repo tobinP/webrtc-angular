@@ -47,59 +47,28 @@ export class SignallingService {
 	onMessage(message: ServerResponse) {
 		switch (message.type) {
 			case MessageType.Login:
-				this.handleLogin(message.success);
+				this.handleLogin(message.data);
 				break;
 			case MessageType.Offer:
-				this.handleOffer(message.offer, message.name);
+				this.handleOffer(message.data, message.name);
 				break;
 			case MessageType.Answer:
-				this.handleAnswer(message.answer);
+				this.handleAnswer(message.data);
 				break;
 			case MessageType.Candidate:
-				this.handleCandidate(message.candidate);
+				this.handleCandidate(message.data);
 				break;
 			case MessageType.Leave:
 				this.handleLeave();
 				break;
 			default:
+				console.log(
+					"unknown message type: ",
+					message.type,
+					message.data
+				);
 				break;
 		}
-	}
-
-	handleOffer(offer: RTCSessionDescriptionInit, name: string) {
-		this.remoteUser = name;
-
-		this.localConnection.setRemoteDescription(
-			new RTCSessionDescription(offer)
-		);
-
-		this.localConnection
-			.createAnswer()
-			.then(answer => {
-				this.localConnection.setLocalDescription(answer);
-				this.socket.next({
-					type: MessageType.Answer,
-					name: this.remoteUser,
-					answer: answer
-				});
-			})
-			.catch(error => alert("error when creating answer: " + error));
-	}
-
-	handleAnswer(answer: RTCSessionDescriptionInit) {
-		this.localConnection.setRemoteDescription(
-			new RTCSessionDescription(answer)
-		);
-	}
-
-	handleCandidate(candidate: RTCIceCandidateInit) {
-		this.localConnection.addIceCandidate(new RTCIceCandidate(candidate));
-	}
-
-	handleLeave() {
-		this.remoteUser = null;
-		this.streamSubjects.forEach(subject => subject.next(null));
-		this.localConnection.close();
 	}
 
 	handleLogin(success: boolean) {
@@ -130,7 +99,7 @@ export class SignallingService {
 							this.socket.next({
 								type: MessageType.Candidate,
 								name: this.remoteUser,
-								candidate: event.candidate
+								data: event.candidate
 							});
 						}
 					};
@@ -142,6 +111,42 @@ export class SignallingService {
 		}
 	}
 
+	handleOffer(offer: RTCSessionDescriptionInit, name: string) {
+		this.remoteUser = name;
+
+		this.localConnection.setRemoteDescription(
+			new RTCSessionDescription(offer)
+		);
+
+		this.localConnection
+			.createAnswer()
+			.then(answer => {
+				this.localConnection.setLocalDescription(answer);
+				this.socket.next({
+					type: MessageType.Answer,
+					name: this.remoteUser,
+					data: answer
+				});
+			})
+			.catch(error => alert("error when creating answer: " + error));
+	}
+
+	handleAnswer(answer: RTCSessionDescriptionInit) {
+		this.localConnection.setRemoteDescription(
+			new RTCSessionDescription(answer)
+		);
+	}
+
+	handleCandidate(candidate: RTCIceCandidateInit) {
+		this.localConnection.addIceCandidate(new RTCIceCandidate(candidate));
+	}
+
+	handleLeave() {
+		this.remoteUser = null;
+		this.streamSubjects.forEach(subject => subject.next(null));
+		this.localConnection.close();
+	}
+
 	call(callee: string) {
 		this.remoteUser = callee;
 		this.localConnection
@@ -150,7 +155,7 @@ export class SignallingService {
 				this.socket.next({
 					type: MessageType.Offer,
 					name: callee,
-					offer: offer
+					data: offer
 				});
 				this.localConnection.setLocalDescription(offer);
 			})
