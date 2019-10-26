@@ -11,6 +11,8 @@ const PEER_CONNECTION_CONFIG: RTCConfiguration = {
 	iceServers: ICE_SERVERS
 };
 
+// const ADDRESS = process.env.ADDRESS;
+
 export enum MessageType {
 	Login = "login",
 	Offer = "offer",
@@ -25,13 +27,20 @@ export enum MessageType {
 export class SignallingService {
 	localStreamSubject: Subject<MediaStream>;
 	remoteStreamSubject: Subject<MediaStream>;
-	socket = webSocket("ws://localhost:9090");
+	// socket = webSocket("ws://localhost:9090");
+	socket: any;
 
 	private localConnection: RTCPeerConnection;
 	private remoteUser: string;
 	private streamSubjects: Array<Subject<MediaStream>>;
 
 	constructor() {
+		// if (ADDRESS) {
+		// 	const address = "ws//:" + ADDRESS + ":9090";
+		// 	this.socket = webSocket(address);
+		// } else {
+		this.socket = webSocket("ws//:54.218.73.227:9090");
+		// }
 		this.localStreamSubject = new Subject<MediaStream>();
 		this.remoteStreamSubject = new Subject<MediaStream>();
 		this.streamSubjects = new Array<Subject<MediaStream>>();
