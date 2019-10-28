@@ -85,6 +85,9 @@
 					"configurations": {
 						"production": {
 							"browserTarget": "webrtc-angular:build:production"
+						},
+						"aws": {
+							"browserTarget": "webrtc-angular:build:production"
 						}
 					}
 				},
