@@ -66,7 +66,7 @@
 							"aot": false,
 							"extractLicenses": true,
 							"vendorChunk": false,
-							"buildOptimizer": true,
+							"buildOptimizer": false,
 							"budgets": [
 								{
 									"type": "initial",
@@ -87,7 +87,7 @@
 							"browserTarget": "webrtc-angular:build:production"
 						},
 						"aws": {
-							"browserTarget": "webrtc-angular:build:production"
+							"browserTarget": "webrtc-angular:build:aws"
 						}
 					}
 				},
