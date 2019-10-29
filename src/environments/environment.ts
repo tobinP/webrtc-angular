@@ -4,7 +4,7 @@
 
 export const environment = {
 	production: false,
-	websocketUrl: "ws//:localhost:9090"
+	websocketUrl: "ws://localhost:9090"
 };
 
 /*
