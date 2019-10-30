@@ -3,8 +3,8 @@
 	"version": "0.0.0",
 	"scripts": {
 		"ng": "ng",
-		"dev": "ng serve",
-		"aws": "ng serve --configuration=aws --host 0.0.0.0",
+		"debug": "ng serve",
+		"aws": "ng serve --configuration=aws --host 0.0.0.0 --disableHostCheck=true",
 		"build": "ng build",
 		"test": "ng test",
 		"lint": "ng lint",

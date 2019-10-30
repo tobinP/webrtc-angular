@@ -43,6 +43,11 @@ export class SignallingService {
 			error => console.log(error),
 			() => console.log("complete")
 		);
+
+		// navigator.getUserMedia = ( navigator.getUserMedia ||
+		// 	navigator.webkitGetUserMedia ||
+		// 	navigator.mozGetUserMedia ||
+		// 	navigator.msGetUserMedia);
 	}
 
 	onMessage(message: ServerResponse) {
@@ -72,43 +77,77 @@ export class SignallingService {
 		}
 	}
 
-	handleLogin(success: boolean) {
+	async handleLogin(success: boolean) {
 		if (success === false) {
 			alert("Ooops...try a different username");
 		} else {
-			navigator.getUserMedia(
-				{ video: true, audio: true },
-				(stream: MediaStream) => {
-					this.localStreamSubject.next(stream);
+			try {
+				let stream = await navigator.mediaDevices.getUserMedia({
+					video: true,
+					audio: true
+				});
+				this.localStreamSubject.next(stream);
 
-					this.localConnection = new RTCPeerConnection(
-						PEER_CONNECTION_CONFIG
+				this.localConnection = new RTCPeerConnection(
+					PEER_CONNECTION_CONFIG
+				);
+
+				stream
+					.getTracks()
+					.forEach(track =>
+						this.localConnection.addTrack(track, stream)
 					);
 
-					stream
-						.getTracks()
-						.forEach(track =>
-							this.localConnection.addTrack(track, stream)
-						);
+				this.localConnection.ontrack = event => {
+					this.remoteStreamSubject.next(event.streams[0]);
+				};
 
-					this.localConnection.ontrack = event => {
-						this.remoteStreamSubject.next(event.streams[0]);
-					};
+				this.localConnection.onicecandidate = event => {
+					if (event.candidate) {
+						this.socket.next({
+							type: MessageType.Candidate,
+							name: this.remoteUser,
+							data: event.candidate
+						});
+					}
+				};
+			} catch (error) {
+				console.log(error);
+			}
 
-					this.localConnection.onicecandidate = event => {
-						if (event.candidate) {
-							this.socket.next({
-								type: MessageType.Candidate,
-								name: this.remoteUser,
-								data: event.candidate
-							});
-						}
-					};
-				},
-				error => {
-					console.log(error);
-				}
-			);
+			// navigator.getUserMedia(
+			// 	{ video: true, audio: true },
+			// 	(stream: MediaStream) => {
+			// 		this.localStreamSubject.next(stream);
+
+			// 		this.localConnection = new RTCPeerConnection(
+			// 			PEER_CONNECTION_CONFIG
+			// 		);
+
+			// 		stream
+			// 			.getTracks()
+			// 			.forEach(track =>
+			// 				this.localConnection.addTrack(track, stream)
+			// 			);
+
+			// 		this.localConnection.ontrack = event => {
+			// 			this.remoteStreamSubject.next(event.streams[0]);
+			// 		};
+
+			// 		this.localConnection.onicecandidate = event => {
+			// 			if (event.candidate) {
+			// 				this.socket.next({
+			// 					type: MessageType.Candidate,
+			// 					name: this.remoteUser,
+			// 					data: event.candidate
+			// 				});
+			// 			}
+			// 		};
+			// 	},
+			// 	error => {
+			// 		console.log(error);
+			// 	}
+			// );
 		}
 	}
 
